@@ -18,18 +18,19 @@
 %{!?python3_pkgversion: %global python3_pkgversion 3}
 %endif  # with python3
 
+%define buildid BUILDID
 %global project_name pyscaleio
 %global project_description %{expand:
 Python library that provides convenient way to interact with ScaleIO/VxFlex REST API.}
 
 Name:    python-scaleio
 Version: 0.1.7
-Release: 1.CROC2%{?dist}
+Release: 1.CROC2%{buildid}%{?dist}
 Summary: ScaleIO/VxFlex API client
 
 Group:   Development/Tools
 License: Apache Software License 2.0
-URL:     https://github.com/gmmephisto/pyscaleio
+URL:     https://github.com/C2Devel/pyscaleio
 Source:  https://pypi.python.org/packages/source/p/%project_name/%project_name-%version.tar.gz
 
 BuildRequires: python2-devel
@@ -83,7 +84,7 @@ BuildRequires: python%{python3_other_pkgversion}-pbr
 
 
 %prep
-%setup -q -n %project_name-%version
+%autosetup -n %project_name-%version
 
 
 %build
@@ -98,7 +99,6 @@ export PBR_VERSION=%version
 
 
 %install
-[ "%buildroot" = "/" ] || rm -rf "%buildroot"
 export PBR_VERSION=%version
 %py2_install
 %if 0%{with python3}
@@ -108,6 +108,7 @@ export PBR_VERSION=%version
 %py3_other_install
 %endif  # with python3_other
 
+rm -rf %buildroot/%(_bindir)/*
 
 %files
 %defattr(-,root,root,-)

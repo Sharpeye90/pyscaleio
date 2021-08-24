@@ -1,4 +1,4 @@
-.PHONY: env changelog sources srpm rpm clean
+.PHONY: sources clean spec
 
 DIST    ?= epel-6-x86_64
 
@@ -6,48 +6,29 @@ VENV    ?= .venv
 PIP     ?= $(VENV)/bin/pip
 PYTHON  ?= $(VENV)/bin/python
 PYVER   ?= python2.7
-PROGRAM := pyscaleio
+PROGRAM ?= pyscaleio
 PACKAGE := python-scaleio
+GIT     := $(shell which git)
 
-VERSION := $(shell rpm -q --qf "%{version}\n" --specfile $(PACKAGE).spec | head -1)
-RELEASE := $(shell rpm -q --qf "%{release}\n" --specfile $(PACKAGE).spec | head -1)
+VERSION = $(shell rpm -q --qf "%{version}\n" --specfile $(PACKAGE).spec | head -1)
+RELEASE = $(shell rpm -q --qf "%{release}\n" --specfile $(PACKAGE).spec | head -1)
 
 
-all: env
+HEAD_SHA := $(shell git rev-parse --short --verify HEAD)
+TAG      := $(shell git show-ref --tags -d | grep $(HEAD_SHA) | \
+                    git name-rev --tags --name-only $$(awk '{print $2}'))
 
-env:
-ifeq ($(wildcard $(PIP)),)
-	virtualenv $(VENV) --python=$(PYVER)
-endif
-	$(PIP) uninstall $(PROGRAM) -q -y ||:
-	$(PYTHON) setup.py develop
-
-ifneq ($(wildcard $(PIP)),)
-changelog:
-	$(PYTHON) setup.py install
+BUILDID := %{nil}
+ifndef TAG
+BUILDID := .$(shell date --date="$$(git show -s --format=%ci $(HEAD_SHA))" '+%Y%m%d%H%M').git$(HEAD_SHA)
 endif
 
-sources: clean
-	@git archive --format=tar --prefix="$(PROGRAM)-$(VERSION)/" \
-		$(shell git rev-parse --verify HEAD) | gzip > "$(PROGRAM)-$(VERSION).tar.gz"
+spec: ## create spec file
+	@git cat-file -p $(HEAD_SHA):$(PACKAGE).spec | sed -e 's,BUILDID,$(BUILDID),g' > $(PACKAGE).spec
 
-srpm: sources
-	@mkdir -p srpms/
-	rpmbuild -bs --define "_sourcedir $(CURDIR)" \
-		--define "_srcrpmdir $(CURDIR)/srpms" $(PACKAGE).spec
-
-rpm:
-	@mkdir -p rpms/$(DIST)
-	/usr/bin/mock -r $(DIST) \
-		--rebuild srpms/$(PACKAGE)-$(VERSION)-$(RELEASE).src.rpm \
-		--resultdir rpms/$(DIST) --no-cleanup-after
-
-copr: srpm
-	@copr-cli build --nowait miushanov/pyscaleio \
-		srpms/$(PACKAGE)-$(VERSION)-$(RELEASE).src.rpm
-
-pypi:
-	@python setup.py sdist bdist_wheel upload
+sources: clean spec
+	@git archive --format=tar --prefix=$(PROGRAM)-$(VERSION)/ $(HEAD_SHA) | \
+	     gzip > $(PROGRAM)-$(VERSION).tar.gz
 
 clean:
 	@rm -rf .coverage .coverage-report .venv/ build/ dist/ \
