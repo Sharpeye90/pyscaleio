@@ -2,15 +2,10 @@
 %global project_description %{expand:
 Python library that provides convenient way to interact with ScaleIO/VxFlex REST API.}
 %define buildid @BUILDID@
-%if 0%{?el8} || 0%{?redos}
-%global el_python3_pkgversion 3
-%else
-%global el_python3_pkgversion 36
-%endif
 
 Name:    python-scaleio
 Version: 0.1.12
-Release: 1.ROCKIT1%{?buildid}%{?dist}
+Release: 1.ROCKIT2%{?buildid}%{?dist}
 Summary: ScaleIO/VxFlex API client
 
 Group:   Development/Tools
@@ -27,14 +22,14 @@ BuildArch:     noarch
 Summary: ScaleIO API client
 BuildRequires: python%{python3_pkgversion}-devel
 BuildRequires: python%{python3_pkgversion}-setuptools
-BuildRequires: python%{el_python3_pkgversion}-six
-BuildRequires: python%{el_python3_pkgversion}-pbr
+BuildRequires: python%{python3_pkgversion}-six
+BuildRequires: python%{python3_pkgversion}-pbr
 
-Requires: python%{el_python3_pkgversion}-requests >= 2.3
+Requires: python%{python3_pkgversion}-requests >= 2.3
 Requires: python%{python3_pkgversion}-object-validator >= 0.1.4
 Requires: python%{python3_pkgversion}-psys >= 0.3
-Requires: python%{el_python3_pkgversion}-inflection
-Requires: python%{el_python3_pkgversion}-six
+Requires: python%{python3_pkgversion}-inflection
+Requires: python%{python3_pkgversion}-six
 
 %description -n python%{python3_pkgversion}-scaleio %{project_description}
 
@@ -65,6 +60,9 @@ export PBR_VERSION=%version
 
 
 %changelog
+* Fri Feb 06 2026 Evgenii Pozdniakov <epozdniakov@k2.cloud> - 0.1.12-1.ROCKIT2
+- Remove el7 support
+
 * Tue Apr 09 2024 Andrey Kulaev <akulaev@croc.ru> - 0.1.11-3
 - Add support for koji redos
 
