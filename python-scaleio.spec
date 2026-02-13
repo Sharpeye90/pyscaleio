@@ -5,7 +5,7 @@ Python library that provides convenient way to interact with ScaleIO/VxFlex REST
 
 Name:    python-scaleio
 Version: 0.1.12
-Release: 1.ROCKIT2%{?buildid}%{?dist}
+Release: 1.ROCKIT2.TEST2%{?buildid}%{?dist}
 Summary: ScaleIO/VxFlex API client
 
 Group:   Development/Tools
